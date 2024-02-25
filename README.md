@@ -1,6 +1,6 @@
-# amity_link_mobile
+# Amity_Link_mobile
 
-A new Flutter project.
+Mobile Application Assignment for the 2nd Year 2nd Semester
 
 ## Getting Started
 
