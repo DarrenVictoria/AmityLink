@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1050572950478",
+    "project_id": "amitylinkmobile-f41ff",
+    "storage_bucket": "amitylinkmobile-f41ff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050572950478:android:a2ace60f1fbd067b1cf99f",
+        "android_client_info": {
+          "package_name": "com.example.amity_link_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl16RMkDc4NkLvjcITACUgqaDpCyQUJSE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
