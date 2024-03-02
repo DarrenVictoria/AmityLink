@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="amity_link_mobile"
+        android:label="AmityLink"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

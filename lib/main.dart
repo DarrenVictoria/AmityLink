@@ -1,9 +1,9 @@
-import 'package:amity_link_mobile/firebase_options.dart';
+import 'package:AmityLink/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:amity_link_mobile/widget_tree.dart';
+import 'package:AmityLink/widget_tree.dart';
 import 'package:flutter_no_internet_widget/flutter_no_internet_widget.dart';
 
 Future<void>main()async{

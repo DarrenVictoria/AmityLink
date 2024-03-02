@@ -1,6 +1,6 @@
-import 'package:amity_link_mobile/auth.dart';
-import 'package:amity_link_mobile/pages/home_page.dart';
-import 'package:amity_link_mobile/pages/login_register_page.dart';
+import 'package:AmityLink/auth.dart';
+import 'package:AmityLink/pages/home_page.dart';
+import 'package:AmityLink/pages/login_register_page.dart';
 import 'package:flutter/material.dart';
 
 class WidgetTree extends StatefulWidget {
