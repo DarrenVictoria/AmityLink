@@ -1,10 +1,15 @@
 import 'package:AmityLink/firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:AmityLink/widget_tree.dart';
 import 'package:flutter_no_internet_widget/flutter_no_internet_widget.dart';
+import '../pages/login_register_page.dart';
+import 'package:AmityLink/pages/join_add.dart';
+import 'package:AmityLink/pages/add_group.dart';
+import 'package:AmityLink/pages/User/user_dashboard.dart';
+import 'package:AmityLink/pages/Group/BulletinBoard/bulletin_main.dart';
+import 'package:AmityLink/pages/Group/GroupSettings/group_settings.dart';
 
 Future<void>main()async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +19,6 @@ Future<void>main()async{
     );
   runApp(const MyApp());
 }
-
-
 
 
 class MyApp extends StatelessWidget {
@@ -36,7 +39,25 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: const WidgetTree(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => WidgetTree(),
+          '/login': (context) => LoginPage(),
+          '/joinadd': (context) => JoinAddPage(),
+          '/addgroup': (context) => AddGroupPage(),
+          '/dashboard': (context) => UserDashboard(),
+          '/bulletin_board': (context) {
+            final String groupId = ModalRoute.of(context)!.settings.arguments as String;
+            return GroupBulletinBoardPage(groupId: groupId);
+          },
+
+          '/group_settings': (context) {
+            final String groupId = ModalRoute.of(context)!.settings.arguments as String;
+            return GroupManagementPage(groupId: groupId);
+          },
+
+          // Define other routes here
+        },
       ),
     );
   }

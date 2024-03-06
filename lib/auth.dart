@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 class Auth{
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Firestore instance
 
   User? get currentUser => _firebaseAuth.currentUser;
 
@@ -17,14 +19,23 @@ class Auth{
     );
   }
 
-  Future<void> createUserWithEmailAndPassword({
+   Future<User?> createUserWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      final UserCredential userCredential =
+          await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      return userCredential.user;
+      
+    } catch (e) {
+      print("Error creating user: $e");
+      throw e; // Rethrow the error to handle it in UI
+    }
   }
 
   Future<void> signOut() async {
