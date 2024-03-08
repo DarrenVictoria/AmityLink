@@ -6,6 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:AmityLink/NavFooter/usertopnav.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:flutter_map/flutter_map.dart';
 
 class ForumPost {
   final String uid; 
@@ -83,6 +86,65 @@ class _GroupBulletinBoardPageState extends State<GroupBulletinBoardPage> {
     return imageUrl;
   }
 
+  Future<void> _sendLocation() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Send Location?'),
+          content: Text('Do you want to send your current location?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _addLocationPost(position);
+                Navigator.of(context).pop();
+              },
+              child: Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+      Future<void> _addLocationPost(Position position) async {
+        String title = 'Hey, I\'m here now';
+        Timestamp timestamp = Timestamp.now(); // Get the current timestamp
+        
+        try {
+          // Fetch user data from Firestore
+          DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+          
+          // Check if user data exists
+          if (userSnapshot.exists) {
+            // Retrieve user's name
+            String userName = userSnapshot.get('name');
+            
+            // Create the location post with user's name
+            await FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('BulletinBoard').add({
+              'Title': title,
+              'Content': userName,
+              'Location': GeoPoint(position.latitude, position.longitude),
+              'uid': uid,
+              'timestamp': timestamp, // Add the timestamp to the document
+            });
+          } else {
+            print('User data not found for UID: $uid');
+          }
+        } catch (e) {
+          print('Error adding location post: $e');
+        }
+      }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +177,7 @@ class _GroupBulletinBoardPageState extends State<GroupBulletinBoardPage> {
           ),
           Expanded(
             child: StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('BulletinBoard').snapshots(),
+              stream: FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('BulletinBoard').orderBy('timestamp', descending: true).snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -159,10 +221,36 @@ class _GroupBulletinBoardPageState extends State<GroupBulletinBoardPage> {
                                   ),
                                 SizedBox(height: 8),
                                 if (post.location != null)
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 18),
-                                    child: Text('Location: ${post.location!.latitude}° N, ${post.location!.longitude}° E'),
+                                Container(
+                                    height: 200,
+                                    child: FlutterMap(
+                                      options: MapOptions(
+                                        center: LatLng(post.location!.latitude, post.location!.longitude),
+                                        zoom: 15.0,
+                                      ),
+                                      children: [
+                                        TileLayer(
+                                          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                          subdomains: ['a', 'b', 'c'],
+                                        ),
+                                        MarkerLayer(
+                                            markers: [
+                                              Marker(
+                                                width: 80.0,
+                                                height: 80.0,
+                                                point: LatLng(post.location!.latitude, post.location!.longitude),
+                                                child: Icon(
+                                                  Icons.location_on,
+                                                  color: Colors.red,
+                                                  size: 50.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                      ],
+                                    ),
                                   ),
+                                      
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -315,90 +403,104 @@ class _GroupBulletinBoardPageState extends State<GroupBulletinBoardPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:
+          Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FloatingActionButton(
+          onPressed: _sendLocation,
+          tooltip: 'Send Location',
+          child: Icon(Icons.location_on),
+        ),
+        SizedBox(height: 16),
+         FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
-  context: context,
-  builder: (BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(hintText: 'Title'),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _contentController,
-                decoration: InputDecoration(hintText: 'Content'),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _uploadImage,
-                icon: Icon(Icons.cloud_upload, color: Color.fromARGB(255, 63, 66, 97)),
-                label: Text('Upload Image'),
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.lightBlue[100],
-                ),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  String title = _titleController.text.trim();
-                  String content = _contentController.text.trim();
-                  String? imageUrl = await _uploadImageToStorage();
-
-                  if (title.isNotEmpty && content.isNotEmpty ) {
-                    try {
-                      await FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('BulletinBoard').add({
-                        'Title': title,
-                        'Content': content,
-                        'ImageURL': imageUrl,
-                        'uid': uid,
-                      });
-
-                      // Clear the form fields
-                      _titleController.clear();
-                      _contentController.clear();
-                      _imageFile = null;
-
-
-                      Navigator.pop(context);
-                    } catch (e) {
-                      print('Error adding forum post: $e');
-                    }
-                  } else {
-                    // Show error message if any of the fields are empty or image upload failed
-                    if (title.isEmpty || content.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Please fill in all the fields and upload an image.'),
-                          backgroundColor: Colors.red,
+            context: context,
+            builder: (BuildContext context) {
+              return ListView(
+                shrinkWrap: true,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _titleController,
+                          decoration: InputDecoration(hintText: 'Title'),
                         ),
-                      );
-                    }
-                  }
-                },
-                child: Text('Post Now'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  },
-);
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: _contentController,
+                          decoration: InputDecoration(hintText: 'Content'),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _uploadImage,
+                          icon: Icon(Icons.cloud_upload, color: Color.fromARGB(255, 63, 66, 97)),
+                          label: Text('Upload Image'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.lightBlue[100],
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            String title = _titleController.text.trim();
+                            String content = _contentController.text.trim();
+                            String? imageUrl = await _uploadImageToStorage();
+                            Timestamp timestamp = Timestamp.now();
+
+                            if (title.isNotEmpty && content.isNotEmpty ) {
+                              try {
+                                await FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('BulletinBoard').add({
+                                  'Title': title,
+                                  'Content': content,
+                                  'ImageURL': imageUrl,
+                                  'uid': uid,
+                                  'timestamp': timestamp,
+                                });
+
+                                // Clear the form fields
+                                _titleController.clear();
+                                _contentController.clear();
+                                _imageFile = null;
+
+
+                                Navigator.pop(context);
+                              } catch (e) {
+                                print('Error adding forum post: $e');
+                              }
+                            } else {
+                              // Show error message if any of the fields are empty or image upload failed
+                              if (title.isEmpty || content.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Please fill in all the fields and upload an image.'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: Text('Post Now'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
 
 
         },
         child: Icon(Icons.add),
       ),
+      ],
+    ),
     );
   }
 }

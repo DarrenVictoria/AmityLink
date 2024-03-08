@@ -382,6 +382,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  flutter_map:
+    dependency: "direct main"
+    description:
+      name: flutter_map
+      sha256: cda8d72135b697f519287258b5294a57ce2f2a5ebf234f0e406aad4dc14c9399
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.0"
   flutter_native_splash:
     dependency: "direct dev"
     description:
@@ -432,6 +440,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.0"
+  geolocator:
+    dependency: "direct main"
+    description:
+      name: geolocator
+      sha256: b8f520252c5c66851295bcc263bc8ae7555501938427f72216ba7688702e261d
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.7.1"
+  geolocator_android:
+    dependency: transitive
+    description:
+      name: geolocator_android
+      sha256: "2f84d6d68b97a3774f2c4111ac95ec5898cd9b98f12193fc3ea7fa21d7a8b46c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
+  geolocator_apple:
+    dependency: transitive
+    description:
+      name: geolocator_apple
+      sha256: "1e8e398cc92151d946a4bbd34e2075885333e42d35ca33e418e7ce7b0a29991e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
+  geolocator_platform_interface:
+    dependency: transitive
+    description:
+      name: geolocator_platform_interface
+      sha256: "9d6f34a8a4b704d504f34acc5e52d880a7d2caedd99739902d6319179b0336d4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
+  geolocator_web:
+    dependency: transitive
+    description:
+      name: geolocator_web
+      sha256: "0b9e0ec13ce2211085cae0055b3516c975bd6cfe2878a20c8f13611f1a259855"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.6"
   glob:
     dependency: transitive
     description:
@@ -480,30 +528,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.7"
-  image_cropper:
-    dependency: "direct main"
-    description:
-      name: image_cropper
-      sha256: f4bad5ed2dfff5a7ce0dfbad545b46a945c702bb6182a921488ef01ba7693111
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.1"
-  image_cropper_for_web:
-    dependency: transitive
-    description:
-      name: image_cropper_for_web
-      sha256: "865d798b5c9d826f1185b32e5d0018c4183ddb77b7b82a931e1a06aa3b74974e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
-  image_cropper_platform_interface:
-    dependency: transitive
-    description:
-      name: image_cropper_platform_interface
-      sha256: ee160d686422272aa306125f3b6fb1c1894d9b87a5e20ed33fa008e7285da11e
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.0"
   image_picker:
     dependency: "direct main"
     description:
@@ -568,6 +592,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.0"
   io:
     dependency: transitive
     description:
@@ -592,6 +624,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.1"
+  latlong2:
+    dependency: "direct main"
+    description:
+      name: latlong2
+      sha256: "18712164760cee655bc790122b0fd8f3d5b3c36da2cb7bf94b68a197fbb0811b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
   lints:
     dependency: transitive
     description:
@@ -600,6 +640,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  lists:
+    dependency: transitive
+    description:
+      name: lists
+      sha256: "4ca5c19ae4350de036a7e996cdd1ee39c93ac0a2b840f4915459b7d0a7d4ab27"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: b3ff55aeb08d9d8901b767650285872cb1bb8f508373b3e348d60268b0c7f770
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   logging:
     dependency: transitive
     description:
@@ -632,6 +688,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.0"
+  mgrs_dart:
+    dependency: transitive
+    description:
+      name: mgrs_dart
+      sha256: fb89ae62f05fa0bb90f70c31fc870bcbcfd516c843fb554452ab3396f78586f7
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   mime:
     dependency: transitive
     description:
@@ -776,6 +840,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.7.4"
+  polylabel:
+    dependency: transitive
+    description:
+      name: polylabel
+      sha256: "41b9099afb2aa6c1730bdd8a0fab1400d287694ec7615dd8516935fa3144214b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   pool:
     dependency: transitive
     description:
@@ -784,6 +856,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
+  proj4dart:
+    dependency: transitive
+    description:
+      name: proj4dart
+      sha256: c8a659ac9b6864aa47c171e78d41bbe6f5e1d7bd790a5814249e6b68bc44324e
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   provider:
     dependency: transitive
     description:
@@ -933,6 +1013,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  unicode:
+    dependency: transitive
+    description:
+      name: unicode
+      sha256: "0f69e46593d65245774d4f17125c6084d2c20b4e473a983f6e21b7d7762218f1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   universal_io:
     dependency: transitive
     description:
@@ -989,6 +1077,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  wkt_parser:
+    dependency: transitive
+    description:
+      name: wkt_parser
+      sha256: "8a555fc60de3116c00aad67891bcab20f81a958e4219cc106e3c037aa3937f13"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   xml:
     dependency: transitive
     description:

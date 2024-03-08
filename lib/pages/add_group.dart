@@ -8,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../NavFooter/usertopnav.dart';
 import 'package:AmityLink/auth.dart';
-import 'package:image_cropper/image_cropper.dart';
 
 
 class AddGroupPage extends StatefulWidget {
