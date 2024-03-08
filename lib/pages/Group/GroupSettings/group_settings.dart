@@ -1,10 +1,12 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:AmityLink/NavFooter/usertopnav.dart';
+import 'package:AmityLink/auth.dart';
+
 
 
 
@@ -26,6 +28,10 @@ class _GroupManagementPageState extends State<GroupManagementPage> {
     super.initState();
     userProfilePicture = NetworkImage('https://example.com/placeholder_image.jpg');
     fetchGroupData();
+  }
+
+   Future<void> signOut(BuildContext context) async {
+    await Auth().signOut();
   }
 
   Future<void> fetchGroupData() async {
@@ -200,9 +206,20 @@ Widget build(BuildContext context) {
   String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
 
   return Scaffold(
-    appBar: AppBar(
-      title: Text('Group Management'),
-    ),
+    appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: TopNavigationBar(
+          onBack: () {
+            Navigator.of(context).pop();
+          },
+          onDashboardSelected: () {
+            Navigator.pushNamed(context, '/dashboard');
+          },
+          onSignOutSelected: () {
+            signOut(context);
+          },
+        ),
+      ),
     body: FutureBuilder<bool>(
       future: isAdmin(currentUserUid),
       builder: (context, snapshot) {
@@ -237,9 +254,9 @@ Widget build(BuildContext context) {
                   ),
                   SizedBox(height: 16.0),
                   Text(
-                    'Group Name: $name',
+                    '$name',
                     style: TextStyle(
-                      fontSize: 18.0,
+                      fontSize: 30.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

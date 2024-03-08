@@ -48,22 +48,21 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 }
 
-  Future<void> fetchUserData() async {
+Future<void> fetchUserData() async {
   try {
-    DocumentSnapshot userSnapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
     if (userSnapshot.exists) {
       setState(() {
         name = (userSnapshot.data() as Map<String, dynamic>)['name'];
         email = (userSnapshot.data() as Map<String, dynamic>)['email'];
         feelingStatus = (userSnapshot.data() as Map<String, dynamic>)['FeelingStatus'];
 
-        String? profilePictureUrl = (userSnapshot.data() as Map<String, dynamic>)['profilePicture'];
+        String? profilePictureUrl = (userSnapshot.data() as Map<String, dynamic>)['ProfilePicture'];
         if (profilePictureUrl != null && profilePictureUrl.isNotEmpty) {
-          // If profile picture URL is present, use it
+          // Load the profile picture asynchronously
           userProfilePicture = NetworkImage(profilePictureUrl);
         } else {
-          // Otherwise, use a placeholder image from the internet
+          // Use a placeholder image if profile picture URL is not available
           userProfilePicture = NetworkImage('https://example.com/placeholder_image.jpg');
         }
       });
@@ -81,6 +80,7 @@ class _UserDashboardState extends State<UserDashboard> {
     });
   }
 }
+
 
 Future<void> updateUserName(String newName) async {
     try {
