@@ -36,6 +36,8 @@ class GroupBulletinBoardPage extends StatefulWidget {
 
   GroupBulletinBoardPage({Key? key, required this.groupId}) : super(key: key);
 
+  
+
   @override
   _GroupBulletinBoardPageState createState() => _GroupBulletinBoardPageState();
 }
@@ -478,7 +480,7 @@ class _GroupBulletinBoardPageState extends State<GroupBulletinBoardPage> {
                               if (title.isEmpty || content.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Please fill in all the fields and upload an image.'),
+                                    content: Text('Please fill in all the fields '),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

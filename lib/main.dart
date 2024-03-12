@@ -10,6 +10,9 @@ import 'package:AmityLink/pages/add_group.dart';
 import 'package:AmityLink/pages/User/user_dashboard.dart';
 import 'package:AmityLink/pages/Group/BulletinBoard/bulletin_main.dart';
 import 'package:AmityLink/pages/Group/GroupSettings/group_settings.dart';
+import 'package:AmityLink/pages/Group/Events/events_home.dart';
+import 'package:AmityLink/pages/Group/Events/Upcoming/attendance_poll.dart';
+import 'package:AmityLink/pages/Group/Events/Voting/attendance_date.dart';
 
 Future<void>main()async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +58,26 @@ class MyApp extends StatelessWidget {
             final String groupId = ModalRoute.of(context)!.settings.arguments as String;
             return GroupManagementPage(groupId: groupId);
           },
+
+           '/events_home': (context) {
+            final String groupId = ModalRoute.of(context)!.settings.arguments as String;
+            return EventsPage(groupId: groupId);
+          },
+
+          '/attendance_poll': (context) {
+            final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            final String documentId = arguments['documentId']!;
+            final String groupId = arguments['groupId']!;
+            return AttendancePollPage(documentId: documentId, groupId: groupId);
+          },
+
+          '/attendance_date': (context) {
+            final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            final String documentId = arguments['documentId']!;
+            final String groupId = arguments['groupId']!;
+            return AttendanceDatePage(documentId: documentId, groupId: groupId);
+          },
+
 
           // Define other routes here
         },

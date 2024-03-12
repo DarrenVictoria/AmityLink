@@ -96,7 +96,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                           groupProfilePictureUrl!,
                           width: 100,
                           height: 100,
-                          alignment: Alignment.centerRight,
+                          fit: BoxFit.cover, // Zoom the image to fit the circle
                         ),
                       ),
                     )
@@ -185,6 +185,33 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                           style: TextStyle(
                             fontSize: 22, // Set the font size to 20
                             fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+               GestureDetector(
+                  onTap: () {
+                    // Redirect to group bulletin board page
+                    Navigator.pushNamed(context, '/events_home', arguments: widget.groupId);
+                  },
+                  child: Card(
+                    color: Color(0xFFEEBEFF), // Set the background color to blue
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.event_available_sharp, // Change the icon to a pin
+                          size: 40, // Increase the size of the icon
+                        ),
+                        SizedBox(height: 15), // Increase the spacing between the icon and the text
+                        Text(
+                          'Events',
+                          style: TextStyle(
+                            fontSize: 22, // Increase the font size of the text
+                            fontWeight: FontWeight.bold, // Make the text bold
                           ),
                         ),
                       ],

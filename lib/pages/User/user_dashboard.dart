@@ -154,147 +154,151 @@ Future<void> updateFeelingStatus(int value) async {
 
 
   @override
-   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: TopNavigationBar(
-          onBack: () {
-            Navigator.of(context).pop();
-          },
-          onDashboardSelected: () {
-            Navigator.pushNamed(context, '/dashboard');
-          },
-          onSignOutSelected: () {
-            signOut(context);
-          },
-        ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: PreferredSize(
+      preferredSize: Size.fromHeight(kToolbarHeight),
+      child: TopNavigationBar(
+        onBack: () {
+          Navigator.of(context).pop();
+        },
+        onDashboardSelected: () {
+          Navigator.pushNamed(context, '/dashboard');
+        },
+        onSignOutSelected: () {
+          signOut(context);
+        },
       ),
-            body: Container(
-              color: Colors.grey[200],
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+    ),
+    body: SafeArea(
+      child: Container(
+        color: Colors.grey[200],
+        padding: EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 50.0,
+                backgroundImage: userProfilePicture,
+              ),
+              SizedBox(height: 8.0),
+              ElevatedButton(
+                onPressed: () async {
+                  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    uploadImageToStorage(pickedFile.path);
+                  }
+                },
+                child: Text('Update Profile Picture'),
+              ),
+              SizedBox(height: 16.0),
+              Text(
+                'Name: $name',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8.0),
+              Text(
+                'Email: $email',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16.0),
+              feelingStatus != null
+                ? Text(
+                    'Your current Status: ${getFeelingStatusText(feelingStatus)}',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : SizedBox.shrink(),
+
+              SizedBox(height: 50.0),
+              Text(
+                'How are you feeling today?',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              EmojiFeedback(
+                animDuration: const Duration(milliseconds: 300),
+                curve: Curves.bounceIn,
+                inactiveElementScale: .5,
+                onChanged: (value) {
+                  updateFeelingStatus(value);
+                },
+              ),
+              SizedBox(height: 16.0),
+              Row(
                 children: [
-                  CircleAvatar(
-                      radius: 50.0,
-                      backgroundImage: userProfilePicture,
-                    ),
-
-                  SizedBox(height: 8.0),
-                  ElevatedButton(
-                    onPressed: ()async {
-                        final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-                        if (pickedFile != null) {
-                          uploadImageToStorage(pickedFile.path);
-                        }
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _showEditNameDialog(context);
                       },
-                    child: Text('Update Profile Picture'),
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    'Name: $name',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF615e5e),
+                        onPrimary: Colors.white,
+                      ),
+                      icon: Icon(Icons.edit),
+                      label: Text('Edit Profile Name'),
                     ),
                   ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Email: $email',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 16.0),
-                  feelingStatus != null
-                    ? Text(
-                        'Your current Status: ${getFeelingStatusText(feelingStatus)}',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : SizedBox.shrink(),
-
-                  SizedBox(height: 50.0),
-                  Text(
-                    'How are you feeling today?',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  EmojiFeedback(
-                    animDuration: const Duration(milliseconds: 300),
-                    curve: Curves.bounceIn,
-                    inactiveElementScale: .5,
-                    onChanged: (value) {
-                      updateFeelingStatus(value);
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            _showEditNameDialog(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: Color(0xFF615e5e),
-                            onPrimary: Colors.white,
-                          ),
-                          icon: Icon(Icons.edit),
-                          label: Text('Edit Profile Name'),
-                        ),
-                      ),
-                    ],
-                  ),
-                   SizedBox(height: 8.0),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            _showDeleteAccountConfirmation(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.red,
-                            onPrimary: Colors.white,
-                          ),
-                          icon: Icon(Icons.delete),
-                          label: Text('Delete profile'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8.0),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            signOut(context);
-                            Navigator.pushNamed(context, '/');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: Color(0xFF615e5e),
-                            onPrimary: Colors.white,
-                          ),
-                          icon: Icon(Icons.logout),
-                          label: Text('Logout'),
-                        ),
-                      ),
-                    ],
-                  ),
-                 
                 ],
               ),
-            ),
-          );
-        }
+               SizedBox(height: 8.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _showDeleteAccountConfirmation(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.red,
+                        onPrimary: Colors.white,
+                      ),
+                      icon: Icon(Icons.delete),
+                      label: Text('Delete profile'),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        signOut(context);
+                        Navigator.pushNamed(context, '/');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF615e5e),
+                        onPrimary: Colors.white,
+                      ),
+                      icon: Icon(Icons.logout),
+                      label: Text('Logout'),
+                    ),
+                  ),
+                ],
+              ),
+             
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+ 
 
         void _showEditNameDialog(BuildContext context) {
     String newName = '';
