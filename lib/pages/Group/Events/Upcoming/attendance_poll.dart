@@ -204,7 +204,32 @@ void _showNotGoingUsersPopup(BuildContext context) {
       'EventStatus': 'Done',
     });
 
-    // Move back a page
+    
+      // Get the event details
+      final eventSnapshot = await FirebaseFirestore.instance
+          .collection('amities')
+          .doc(widget.groupId)
+          .collection('Events')
+          .doc(widget.documentId)
+          .get();
+
+      
+      final eventName = eventSnapshot['EventName'] as String;
+      final finalDate = eventSnapshot['FinalDate'] as Timestamp;
+
+      // Set the document in MemoryPics collection
+      await FirebaseFirestore.instance
+          .collection('amities')
+          .doc(widget.groupId)
+          .collection('MemoryPics')
+          .doc(widget.documentId)
+          .set({
+        'Footage': [],
+        'EventName': eventName,
+        'FinalDate': finalDate, 
+      });
+    
+        // Move back a page
     Navigator.pop(context);
   }
 

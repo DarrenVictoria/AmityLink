@@ -49,7 +49,7 @@ TextEditingController _groupCodeController = TextEditingController();
       preferredSize: Size.fromHeight(kToolbarHeight),
       child: TopNavigationBar(
         onBack: () {
-          Navigator.of(context).pop();
+          Navigator.pushNamed(context, '/');
         },
         onDashboardSelected: () {
           Navigator.pushNamed(context, '/dashboard');

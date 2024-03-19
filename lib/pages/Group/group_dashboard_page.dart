@@ -19,6 +19,9 @@ class GroupDashboardPage extends StatefulWidget {
 class _GroupDashboardPageState extends State<GroupDashboardPage> {
   final User? user = Auth().currentUser;
 
+  
+ 
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String? groupProfilePictureUrl;
   
@@ -27,6 +30,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
   void initState() {
     super.initState();
     fetchGroupProfilePicture();
+    
   }
 
   Future<void> fetchGroupProfilePicture() async {
@@ -53,12 +57,14 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: TopNavigationBar(
           onBack: () {
-            Navigator.of(context).pop();
+            Navigator.pushNamed(context, '/');
           },
           onDashboardSelected: () {
             Navigator.pushNamed(context, '/dashboard');
@@ -209,6 +215,91 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                         SizedBox(height: 15), // Increase the spacing between the icon and the text
                         Text(
                           'Events',
+                          style: TextStyle(
+                            fontSize: 22, // Increase the font size of the text
+                            fontWeight: FontWeight.bold, // Make the text bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                GestureDetector(
+                  onTap: () {
+                    // Redirect to group bulletin board page
+                    Navigator.pushNamed(context, '/event_memories', arguments: widget.groupId);
+                  },
+                  child: Card(
+                    color: Color.fromARGB(255, 207, 131, 39), // Set the background color to blue
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.image, // Change the icon to a pin
+                          size: 40, // Increase the size of the icon
+                        ),
+                        SizedBox(height: 15), // Increase the spacing between the icon and the text
+                        Text(
+                          'Memories',
+                          style: TextStyle(
+                            fontSize: 22, // Increase the font size of the text
+                            fontWeight: FontWeight.bold, // Make the text bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                GestureDetector(
+                  onTap: () {
+                    
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Leave Group'),
+                            content: Text('Are you sure you want to leave the group?'),
+                            actions: [
+                              TextButton(
+                                child: Text('Cancel'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: Text('Leave'),
+                                onPressed: () {
+                                  // Remove the user's UID from the 'GroupMembers' array
+                                  FirebaseFirestore.instance.collection('amities').doc(widget.groupId).update({
+                                    'GroupMembers': FieldValue.arrayRemove([currentUserUid]),
+                                  }).then((_) {
+                                    print("Left the group successfully");
+                                  }).catchError((error) {
+                                    print("Error leaving the group: $error");
+                                  });
+
+                                  Navigator.pushNamed(context, '/');
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                  },
+                  child: Card(
+                    color: Color.fromARGB(255, 232, 79, 79), // Set the background color to blue
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.exit_to_app, // Change the icon to a pin
+                          size: 40, // Increase the size of the icon
+                        ),
+                        SizedBox(height: 15), // Increase the spacing between the icon and the text
+                        Text(
+                          'Leave Group',
                           style: TextStyle(
                             fontSize: 22, // Increase the font size of the text
                             fontWeight: FontWeight.bold, // Make the text bold

@@ -13,6 +13,8 @@ import 'package:AmityLink/pages/Group/GroupSettings/group_settings.dart';
 import 'package:AmityLink/pages/Group/Events/events_home.dart';
 import 'package:AmityLink/pages/Group/Events/Upcoming/attendance_poll.dart';
 import 'package:AmityLink/pages/Group/Events/Voting/attendance_date.dart';
+import 'package:AmityLink/pages/Group/MemoryPics/event_memories.dart';
+import 'package:AmityLink/pages/Group/MemoryPics/individual_memories.dart';
 
 Future<void>main()async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +79,19 @@ class MyApp extends StatelessWidget {
             final String groupId = arguments['groupId']!;
             return AttendanceDatePage(documentId: documentId, groupId: groupId);
           },
+
+          '/event_memories': (context) {
+            final String groupId = ModalRoute.of(context)!.settings.arguments as String;
+            return MemoryPicsPage(groupId: groupId);
+          },
+
+          '/individual_memory_page': (context) {
+          final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final String groupId = arguments['groupId']!;
+          final String documentId = arguments['documentId']!;
+          return IndividualMemoryPage(groupId: groupId, documentId: documentId);
+},
+
 
 
           // Define other routes here

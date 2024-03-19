@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -56,6 +58,61 @@ Future<void> createUserWithEmailAndPassword() async {
   }
 }
 
+Future<void> signInWithGoogle() async {
+  try {
+    // Configure GoogleSignIn options
+    final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
+
+    // Sign out the user from Google sign-in
+    await googleSignIn.signOut();
+
+    // Trigger the Google sign-in flow
+    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      // Obtain the GoogleSignInAuthentication object
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+
+      // Create a new credential
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Get the user details
+      final User? user = userCredential.user;
+
+      // Check if the user is signing in for the first time
+      if (user != null && userCredential.additionalUserInfo!.isNewUser) {
+        // If it's a new user, fetch user details from Google
+        final googleUser = await googleSignIn.currentUser;
+
+        // Create a new document in Firestore for the user
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': googleUser!.displayName,
+          'email': googleUser.email,
+          'ProfilePicture': googleUser.photoUrl,
+          // You can add more fields as needed
+        });
+      }
+    }
+
+    // Navigate to the home page or perform any other desired action
+  } catch (e) {
+    // Handle errors
+    print("Error signing in with Google: $e");
+  }
+}
+
+
+
+
+
 
   Widget _title() {
     return const Text('Amity Link');
@@ -98,18 +155,34 @@ Future<void> createUserWithEmailAndPassword() async {
   }
 
   Widget _submitButton() {
-    return Container(
-      width: double.infinity, // Set the width to occupy the entire available space
-      child: ElevatedButton(
-        onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
-        child: Text(isLogin ? 'Login' : 'Register Now'),
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 20.0), // Increase the vertical padding
-          textStyle: TextStyle(fontSize: 15.0), // Increase the font size
+  return Container(
+    width: double.infinity,
+    child: Column(
+      children: [
+        ElevatedButton(
+          onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
+          child: Text(isLogin ? 'Login' : 'Register Now'),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 12.0),
+            textStyle: TextStyle(fontSize: 15.0),
+            minimumSize: Size(double.infinity, 50.0), // Set the minimum width and height
+          ),
         ),
-      ),
-    );
-  }
+        SizedBox(height: 10), // Add some spacing between buttons
+        if (isLogin) // Show "Sign in with Google" button only when logging in
+          OutlinedButton.icon(
+            onPressed: signInWithGoogle,
+            icon: Icon(Icons.account_circle), // Use Icons.account_circle for Google sign-in
+            label: Text('Sign in with Google'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(50.0, 50.0), // Set the minimum width and height
+            ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _loginOrRegisterButton() {
     return TextButton(
