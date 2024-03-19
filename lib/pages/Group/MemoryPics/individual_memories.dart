@@ -8,20 +8,29 @@ import 'package:AmityLink/NavFooter/usertopnav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_picker/image_picker.dart';
 
-class IndividualMemoryPage extends StatelessWidget {
+class IndividualMemoryPage extends StatefulWidget {
   final String groupId;
   final String documentId;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   IndividualMemoryPage({Key? key, required this.groupId, required this.documentId}) : super(key: key);
+
+  @override
+  _IndividualMemoryPageState createState() => _IndividualMemoryPageState();
+}
+
+class _IndividualMemoryPageState extends State<IndividualMemoryPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final ImagePicker _picker = ImagePicker();
+
 
   Future<void> signOut(BuildContext context) async {
     await Auth().signOut();
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
@@ -120,6 +129,25 @@ class IndividualMemoryPage extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () => _downloadAllMedia(context),
+            icon: Icon(Icons.download),
+            label: Text('Download All'),
+            backgroundColor: Colors.blue,
+          ),
+          SizedBox(height: 16.0),
+          FloatingActionButton.extended(
+            onPressed: () => _addFootage(context),
+            icon: Icon(Icons.add),
+            label: Text('Add Footage'),
+            backgroundColor: Colors.blue,
+          ),
+        ],
+      ),
     );
   }
 
@@ -205,13 +233,94 @@ class IndividualMemoryPage extends StatelessWidget {
     try {
       DocumentSnapshot documentSnapshot = await _firestore
           .collection('amities')
-          .doc(groupId)
+          .doc(widget.groupId)
           .collection('MemoryPics')
-          .doc(documentId)
+          .doc(widget.documentId)
           .get();
       return documentSnapshot;
     } catch (error) {
       throw ('Error fetching memory document: $error');
     }
   }
+
+        void _downloadAllMedia(BuildContext context) async {
+        final DocumentSnapshot documentSnapshot = await _fetchMemoryDocument();
+        final footage = documentSnapshot.get('Footage') as List<dynamic>? ?? [];
+
+        for (String mediaUrl in footage) {
+          try {
+            var request = await HttpClient().getUrl(Uri.parse(mediaUrl));
+            var response = await request.close();
+            Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+            final result = await ImageGallerySaver.saveImage(bytes);
+            if (result == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to download $mediaUrl'),
+                ),
+              );
+            }
+          } on PlatformException catch (e) {
+            print('Failed to save media: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to download $mediaUrl'),
+              ),
+            );
+          }
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('All media downloaded successfully'),
+          ),
+        );
+      }
+
+      Future<void> _addFootage(BuildContext context) async {
+  try {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      // Upload picked image to Firebase Storage
+      await _uploadToStorage(File(pickedFile.path));
+      // Show snackbar
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image uploaded successfully')));
+      // Refresh FutureBuilder
+      setState(() {});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No image selected')));
+    }
+  } catch (e) {
+    print('Error selecting image: $e');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to select image')));
+  }
+}
+
+
+  Future<void> _uploadToStorage(File file) async {
+    try {
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
+      final Reference reference = _storage.ref().child('amities/${widget.groupId}/MemoryPics/${widget.documentId}/$fileName');
+      await reference.putFile(file);
+      final String downloadUrl = await reference.getDownloadURL();
+      // Update Firestore document with downloadUrl
+      await _updateFirestore(downloadUrl);
+    } catch (e) {
+      print('Error uploading file to storage: $e');
+      throw Exception('Failed to upload file to storage');
+    }
+  }
+
+  Future<void> _updateFirestore(String downloadUrl) async {
+    try {
+      await _firestore.collection('amities').doc(widget.groupId).collection('MemoryPics').doc(widget.documentId).update({
+        'Footage': FieldValue.arrayUnion([downloadUrl]),
+      });
+    } catch (e) {
+      print('Error updating Firestore document: $e');
+      throw Exception('Failed to update Firestore document');
+    }
+  }
+
+
 }
