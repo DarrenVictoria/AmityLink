@@ -12,6 +12,7 @@ import 'package:AmityLink/auth.dart';
 
 class GroupManagementPage extends StatefulWidget {
   final String groupId;
+  
 
   const GroupManagementPage({Key? key, required this.groupId}) : super(key: key);
 
@@ -21,6 +22,7 @@ class GroupManagementPage extends StatefulWidget {
 
 class _GroupManagementPageState extends State<GroupManagementPage> {
   String name = '';
+  String description = '';
   late ImageProvider userProfilePicture;
 
   @override
@@ -41,6 +43,7 @@ class _GroupManagementPageState extends State<GroupManagementPage> {
       if (groupSnapshot.exists) {
         setState(() {
           name = groupSnapshot['GroupName'];
+          description = groupSnapshot['GroupDescription'] ?? '';
           String? profilePictureUrl = groupSnapshot['GroupProfilePicture'];
           if (profilePictureUrl != null && profilePictureUrl.isNotEmpty) {
             userProfilePicture = NetworkImage(profilePictureUrl);
@@ -64,6 +67,19 @@ class _GroupManagementPageState extends State<GroupManagementPage> {
       });
     } catch (e) {
       print("Error updating group name: $e");
+    }
+  }
+
+  Future<void> updateGroupDescription(String newDescription) async {
+    try {
+      await FirebaseFirestore.instance.collection('amities').doc(widget.groupId).update({
+        'GroupDescription': newDescription,
+      });
+      setState(() {
+        description = newDescription;
+      });
+    } catch (e) {
+      print("Error updating group description: $e");
     }
   }
 
@@ -127,14 +143,47 @@ void _leaveGroup(String uid) {
 }
 
 void _removeUserFromGroup(String memberId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Remove Member'),
+        content: Text('Are you sure you want to leave from the group?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Call a function to remove the user from the group members
+              _removeMember(memberId);
+              
+              Navigator.pop(context); // Close the dialog
+
+              Navigator.pushNamed(context, '/');
+            },
+            child: Text('Remove'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _removeMember(String memberId) {
   FirebaseFirestore.instance.collection('amities').doc(widget.groupId).update({
     'GroupMembers': FieldValue.arrayRemove([memberId]),
   }).then((_) {
     print("User removed from the group successfully");
+    
   }).catchError((error) {
     print("Error removing user from the group: $error");
   });
 }
+
 
 Future<void> editGroupProfilePicture(String newImageUrl) async {
   try {
@@ -260,6 +309,13 @@ Widget build(BuildContext context) {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                   SizedBox(height: 16.0),
+                    Text(
+                      '$description', // Display group description
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
                   SizedBox(height: 16.0),
                   Container(
                     width: double.infinity,
@@ -269,6 +325,17 @@ Widget build(BuildContext context) {
                       },
                       child: Text(
                         'Edit Group Name',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                       _showEditGroupDescriptionDialog(context);
+                      },
+                      child: Text(
+                        'Edit Group Description',
                       ),
                     ),
                   ),
@@ -340,6 +407,8 @@ Widget build(BuildContext context) {
                                                     onPressed: () {
                                                       // Call a function to remove the user from the group members
                                                       _removeUserFromGroup(memberId);
+                                                       
+                                                      
                                                     },
                                                   )
                                                 : null,
@@ -396,6 +465,40 @@ Widget build(BuildContext context) {
       },
     );
   }
+
+  void _showEditGroupDescriptionDialog(BuildContext context) {
+    TextEditingController _descriptionEditingController = TextEditingController(text: description);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Group Description'),
+          content: TextField(
+            controller: _descriptionEditingController,
+            decoration: InputDecoration(hintText: 'Enter new group description'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                updateGroupDescription(_descriptionEditingController.text);
+                Navigator.pop(context);
+              },
+              child: Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  
 
   
 

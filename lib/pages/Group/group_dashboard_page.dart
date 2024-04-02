@@ -18,6 +18,7 @@ class GroupDashboardPage extends StatefulWidget {
 
 class _GroupDashboardPageState extends State<GroupDashboardPage> {
   final User? user = Auth().currentUser;
+  
 
   
  
@@ -30,6 +31,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
   void initState() {
     super.initState();
     fetchGroupProfilePicture();
+    
     
   }
 
@@ -242,6 +244,33 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                         SizedBox(height: 15), // Increase the spacing between the icon and the text
                         Text(
                           'Memories',
+                          style: TextStyle(
+                            fontSize: 22, // Increase the font size of the text
+                            fontWeight: FontWeight.bold, // Make the text bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                GestureDetector(
+                  onTap: () {
+                    // Redirect to group bulletin board page
+                    Navigator.pushNamed(context, '/calendar', arguments: widget.groupId);
+                  },
+                  child: Card(
+                    color: Color.fromARGB(255, 30, 148, 109), // Set the background color to blue
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.image, // Change the icon to a pin
+                          size: 40, // Increase the size of the icon
+                        ),
+                        SizedBox(height: 15), // Increase the spacing between the icon and the text
+                        Text(
+                          'Calendar',
                           style: TextStyle(
                             fontSize: 22, // Increase the font size of the text
                             fontWeight: FontWeight.bold, // Make the text bold

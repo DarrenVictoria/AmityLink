@@ -15,6 +15,7 @@ import 'package:AmityLink/pages/Group/Events/Upcoming/attendance_poll.dart';
 import 'package:AmityLink/pages/Group/Events/Voting/attendance_date.dart';
 import 'package:AmityLink/pages/Group/MemoryPics/event_memories.dart';
 import 'package:AmityLink/pages/Group/MemoryPics/individual_memories.dart';
+import 'package:AmityLink/pages/Group/Calendar/calendar_main.dart';
 
 Future<void>main()async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,7 +91,12 @@ class MyApp extends StatelessWidget {
           final String groupId = arguments['groupId']!;
           final String documentId = arguments['documentId']!;
           return IndividualMemoryPage(groupId: groupId, documentId: documentId);
-},
+        },
+
+         '/calendar': (context) {
+            final String groupId = ModalRoute.of(context)!.settings.arguments as String;
+            return Calendar(groupId: groupId);
+          },
 
 
 
