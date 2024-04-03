@@ -45,13 +45,18 @@ class Calendar extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   List<DateTime> urgencyDates = [];
+                  List<DateTime> finalDates = [];
                   for (var doc in snapshot.data!.docs) {
                     var eventMap = doc.data() as Map<String, dynamic>;
                     var urgencyDate = eventMap['UrgencyDate'];
+                    var finalDate = eventMap['FinalDate'];
+                    var eventStatus = eventMap['EventStatus'];
                     if (urgencyDate != null) {
                       DateTime urgencyDateTime = urgencyDate.toDate();
-                      if (urgencyDateTime.isAfter(DateTime.now())) {
+                      if (urgencyDateTime.isAfter(DateTime.now()) && eventStatus != "Done") {
                         urgencyDates.add(urgencyDateTime);
+                      } else if (finalDate != null || eventStatus == "Done") {
+                        finalDates.add(finalDate != null ? finalDate.toDate() : urgencyDateTime);
                       }
                     }
                   }
@@ -66,6 +71,16 @@ class Calendar extends StatelessWidget {
                         if (urgencyDates.any((urgencyDate) => isSameDay(urgencyDate, date))) {
                           return CircleAvatar(
                             backgroundColor: Colors.red,
+                            child: Text(
+                              date.day.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        } else if (finalDates.any((finalDate) => isSameDay(finalDate, date))) {
+                          return CircleAvatar(
+                            backgroundColor: Colors.purple,
                             child: Text(
                               date.day.toString(),
                               style: TextStyle(
@@ -103,9 +118,11 @@ class Calendar extends StatelessWidget {
                       var eventName = event['EventName'];
                       var eventMap = event.data() as Map<String, dynamic>;
                       var urgencyDate = eventMap['UrgencyDate'];
+                      var finalDate = eventMap['FinalDate'];
+                      var eventStatus = eventMap['EventStatus'];
                       if (urgencyDate != null) {
                         DateTime urgencyDateTime = urgencyDate.toDate();
-                        if (urgencyDateTime.isAfter(DateTime.now())) {
+                        if (urgencyDateTime.isAfter(DateTime.now()) && eventStatus != "Done") {
                           final formattedDate = DateFormat.yMd().format(urgencyDateTime);
                           return ListTile(
                             title: Text(
@@ -115,6 +132,18 @@ class Calendar extends StatelessWidget {
                             subtitle: Text(
                               'Vote by: $formattedDate',
                               style: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        } else if (finalDate != null || eventStatus == "Done") {
+                          final formattedFinalDate = DateFormat.yMd().format(finalDate != null ? finalDate.toDate() : urgencyDateTime);
+                          return ListTile(
+                            title: Text(
+                              eventName,
+                              style: TextStyle(color: Color.fromARGB(255, 101, 1, 163)),
+                            ),
+                            subtitle: Text(
+                              'Event On: $formattedFinalDate',
+                              style: TextStyle(color: Colors.purple),
                             ),
                           );
                         }
@@ -132,7 +161,12 @@ class Calendar extends StatelessWidget {
           ),
         ],
       ),
-      
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Handle adding events
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
