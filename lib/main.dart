@@ -95,7 +95,7 @@ class MyApp extends StatelessWidget {
 
          '/calendar': (context) {
             final String groupId = ModalRoute.of(context)!.settings.arguments as String;
-            return Calendar(groupId: groupId);
+            return  Calendar(groupId: groupId);
           },
 
 

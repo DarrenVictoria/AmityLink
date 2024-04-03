@@ -390,7 +390,7 @@ Widget build(BuildContext context) {
                                       if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
                                         return const SizedBox.shrink();
                                       }
-                                      String memberName = snapshot.data!.get('name');
+                                      String memberName = snapshot.data!.get('name');  
                                       String? memberProfilePicture = snapshot.data!.get('ProfilePicture'); // Nullable URL
 
                                       return Card(

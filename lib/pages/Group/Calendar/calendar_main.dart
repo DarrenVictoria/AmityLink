@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:AmityLink/NavFooter/usertopnav.dart';
+import 'package:intl/intl.dart';
 
 class Calendar extends StatelessWidget {
   final String groupId;
@@ -10,7 +11,6 @@ class Calendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define variables for the focusedDay, firstDay, and lastDay
     final DateTime now = DateTime.now();
     final DateTime today = DateTime(now.year, now.month, now.day);
     final DateTime firstDay = DateTime(now.year, now.month - 3, now.day);
@@ -36,20 +36,62 @@ class Calendar extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: TableCalendar(
-              focusedDay: today,
-              firstDay: firstDay,
-              lastDay: lastDay,
-              calendarFormat: CalendarFormat.month,
-              // Add more calendar properties and callbacks as needed
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('amities')
+                  .doc(groupId)
+                  .collection('Events')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<DateTime> urgencyDates = [];
+                  for (var doc in snapshot.data!.docs) {
+                    var eventMap = doc.data() as Map<String, dynamic>;
+                    var urgencyDate = eventMap['UrgencyDate'];
+                    if (urgencyDate != null) {
+                      DateTime urgencyDateTime = urgencyDate.toDate();
+                      if (urgencyDateTime.isAfter(DateTime.now())) {
+                        urgencyDates.add(urgencyDateTime);
+                      }
+                    }
+                  }
+
+                  return TableCalendar(
+                    focusedDay: today,
+                    firstDay: firstDay,
+                    lastDay: lastDay,
+                    calendarFormat: CalendarFormat.month,
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, date, events) {
+                        if (urgencyDates.any((urgencyDate) => isSameDay(urgencyDate, date))) {
+                          return CircleAvatar(
+                            backgroundColor: Colors.red,
+                            child: Text(
+                              date.day.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        }
+                        return null;
+                      },
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
             ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('amities')
-                  .doc(groupId) // Use groupId to access the document
-                  .collection('Events') // Access the Events collection
+                  .doc(groupId)
+                  .collection('Events')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -60,25 +102,24 @@ class Calendar extends StatelessWidget {
                       var event = snapshot.data!.docs[index];
                       var eventName = event['EventName'];
                       var eventMap = event.data() as Map<String, dynamic>;
-                      var finalDate = eventMap['FinalDate'];
                       var urgencyDate = eventMap['UrgencyDate'];
-                      var displayDate = finalDate != null ? finalDate.toDate() : (urgencyDate != null ? urgencyDate.toDate() : null); // Use FinalDate if available, else use UrgencyDate
-                      var subtitle = finalDate != null ? 'Event Done Date: $displayDate' : (urgencyDate != null ? 'Vote by: $displayDate' : ''); // Set subtitle based on whether it's FinalDate or UrgencyDate
-                      var subtitleColor = finalDate != null ? Colors.black : Colors.red; // Set subtitle color based on whether it's FinalDate or UrgencyDate
-                      if (displayDate != null) {
-                        return ListTile(
-                          title: Text(
-                            eventName,
-                            style: TextStyle(color: Color.fromARGB(255, 101, 1, 163)), // Show event name in red color
-                          ),
-                          subtitle: Text(
-                            subtitle,
-                            style: TextStyle(color: subtitleColor), // Set subtitle text color based on the type of date
-                          ),
-                        );
-                      } else {
-                        return SizedBox(); // Return an empty widget if neither date exists
+                      if (urgencyDate != null) {
+                        DateTime urgencyDateTime = urgencyDate.toDate();
+                        if (urgencyDateTime.isAfter(DateTime.now())) {
+                          final formattedDate = DateFormat.yMd().format(urgencyDateTime);
+                          return ListTile(
+                            title: Text(
+                              eventName,
+                              style: TextStyle(color: Color.fromARGB(255, 101, 1, 163)),
+                            ),
+                            subtitle: Text(
+                              'Vote by: $formattedDate',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
                       }
+                      return SizedBox();
                     },
                   );
                 } else if (snapshot.hasError) {
@@ -91,12 +132,7 @@ class Calendar extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Handle adding events
-        },
-        child: Icon(Icons.add),
-      ),
+      
     );
   }
 }

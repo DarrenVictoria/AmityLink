@@ -211,7 +211,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.event_available_sharp, // Change the icon to a pin
+                          Icons.calendar_view_day, // Change the icon to a pin
                           size: 40, // Increase the size of the icon
                         ),
                         SizedBox(height: 15), // Increase the spacing between the icon and the text
@@ -265,7 +265,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.image, // Change the icon to a pin
+                          Icons.event_available_sharp, // Change the icon to a pin
                           size: 40, // Increase the size of the icon
                         ),
                         SizedBox(height: 15), // Increase the spacing between the icon and the text
