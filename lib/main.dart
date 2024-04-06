@@ -16,9 +16,14 @@ import 'package:AmityLink/pages/Group/Events/Voting/attendance_date.dart';
 import 'package:AmityLink/pages/Group/MemoryPics/event_memories.dart';
 import 'package:AmityLink/pages/Group/MemoryPics/individual_memories.dart';
 import 'package:AmityLink/pages/Group/Calendar/calendar_main.dart';
+import 'package:AmityLink/pages/Group/FundCollection/fundcoll_home.dart';
+import 'package:AmityLink/pages/Group/FundCollection/fundcoll_individual.dart';
+
 
 Future<void>main()async{
   WidgetsFlutterBinding.ensureInitialized();
+
+  
 
   await Firebase.initializeApp(
     options:DefaultFirebaseOptions.currentPlatform,
@@ -97,6 +102,18 @@ class MyApp extends StatelessWidget {
             final String groupId = ModalRoute.of(context)!.settings.arguments as String;
             return  Calendar(groupId: groupId);
           },
+
+          '/fundcollection': (context) {
+            final String groupId = ModalRoute.of(context)!.settings.arguments as String;
+            return  FundCollectionPage(groupId: groupId);
+          },
+
+          '/paymentdetail': (context) {
+          final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final String groupId = arguments['groupId']!;
+          final String documentId = arguments['documentId']!;
+          return  PaymentDetailPage(groupId: groupId, documentId: documentId);
+        },
 
 
 
