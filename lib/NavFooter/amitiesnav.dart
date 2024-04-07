@@ -33,7 +33,7 @@ class TopNavigationBar extends StatelessWidget {
         IconButton(
           onPressed: () {
             onDashboardSelected();
-            Navigator.pushNamed(context, '/dashboard');
+             Navigator.of(context).pushReplacementNamed('/dashboard');
           },
            
           icon: const Icon(Icons.account_circle),

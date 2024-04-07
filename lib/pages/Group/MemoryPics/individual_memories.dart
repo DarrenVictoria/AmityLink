@@ -33,6 +33,7 @@ class _IndividualMemoryPageState extends State<IndividualMemoryPage> {
   final ImagePicker _picker = ImagePicker();
   late FijkPlayer _player;
   late Future<DocumentSnapshot> _memoryDocument;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
 
   @override
@@ -56,126 +57,134 @@ class _IndividualMemoryPageState extends State<IndividualMemoryPage> {
 
   
 
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: PreferredSize(
-      preferredSize: Size.fromHeight(kToolbarHeight),
-      child: TopNavigationBar(
-        onBack: () {
-          Navigator.of(context).pop();
-        },
-        onDashboardSelected: () {
-          Navigator.pushNamed(context, '/dashboard');
-        },
-        onSignOutSelected: () {
-          signOut(context);
-        },
+ Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: TopNavigationBar(
+          onBack: () {
+            Navigator.of(context).pop();
+          },
+          onDashboardSelected: () {
+            Navigator.pushNamed(context, '/dashboard');
+          },
+          onSignOutSelected: () {
+            signOut(context);
+          },
+        ),
       ),
-    ),
-    body: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 20),
-          // Display EventName from the document
-          FutureBuilder<DocumentSnapshot>(
-            future: _memoryDocument,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                final eventName = snapshot.data!.get('EventName') ?? 'Event Name Not Available';
-                final footageCount = (snapshot.data!.get('Footage') as List<dynamic>?)?.length ?? 0;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      eventName,
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    // Display footage count
-                    Text(
-                      'Footage Count: $footageCount',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                );
-              }
-            },
-          ),
-          SizedBox(height: 20),
-          // Thumbnails for images and videos
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 80.0), // Adjust bottom padding for button space
-              child: FutureBuilder<DocumentSnapshot>(
+      body: RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: () async {
+          setState(() {
+            _memoryDocument = _fetchMemoryDocument();
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              // Display EventName from the document
+              FutureBuilder<DocumentSnapshot>(
                 future: _memoryDocument,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else {
-                    final footage = snapshot.data!.get('Footage') as List<dynamic>? ?? [];
-                    return SingleChildScrollView(
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
+                    final eventName = snapshot.data!.get('EventName') ?? 'Event Name Not Available';
+                    final footageCount = (snapshot.data!.get('Footage') as List<dynamic>?)?.length ?? 0;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          eventName,
+                          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                         ),
-                        itemCount: footage.length,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final mediaUrl = footage[index];
-                          return GestureDetector(
-                            onTap: () {
-                              _handleMediaTap(mediaUrl);
-                            },
-                            child: Container(
-                              color: Colors.grey[300],
-                              child: _buildMediaThumbnail(mediaUrl),
-                            ),
-                          );
-                        },
-                      ),
+                        SizedBox(height: 8),
+                        // Display footage count
+                        Text(
+                          'Footage Count: $footageCount',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ],
                     );
                   }
                 },
               ),
-            ),
+              SizedBox(height: 20),
+              // Thumbnails for images and videos
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80.0), // Adjust bottom padding for button space
+                  child: FutureBuilder<DocumentSnapshot>(
+                    future: _memoryDocument,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        final footage = snapshot.data!.get('Footage') as List<dynamic>? ?? [];
+                        return SingleChildScrollView(
+                          child: GridView.builder(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            itemCount: footage.length,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final mediaUrl = footage[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  _handleMediaTap(mediaUrl);
+                                },
+                                child: Container(
+                                  color: Colors.grey[300],
+                                  child: _buildMediaThumbnail(mediaUrl),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () => _downloadAllMedia(context),
+            icon: Icon(Icons.download),
+            label: Text('Download All'),
+            backgroundColor: Colors.blue,
+          ),
+          SizedBox(height: 16.0),
+          FloatingActionButton.extended(
+            onPressed: () => _addFootage(context),
+            icon: Icon(Icons.add),
+            label: Text('Add Footage'),
+            backgroundColor: Colors.blue,
           ),
         ],
       ),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    floatingActionButton: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FloatingActionButton.extended(
-          onPressed: () => _downloadAllMedia(context),
-          icon: Icon(Icons.download),
-          label: Text('Download All'),
-          backgroundColor: Colors.blue,
-        ),
-        SizedBox(height: 16.0),
-        FloatingActionButton.extended(
-          onPressed: () => _addFootage(context),
-          icon: Icon(Icons.add),
-          label: Text('Add Footage'),
-          backgroundColor: Colors.blue,
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 
 
 Widget _buildMediaThumbnail(String mediaUrl) {

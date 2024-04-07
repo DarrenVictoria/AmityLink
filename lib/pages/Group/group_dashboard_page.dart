@@ -152,7 +152,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                     Navigator.pushNamed(context, '/bulletin_board', arguments: widget.groupId);
                   },
                   child: Card(
-                    color: Color(0xFFA0EAFD), // Set the background color to blue
+                    color: Color(0xFFD8BFD8), // Set the background color to blue
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -179,7 +179,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                     Navigator.pushNamed(context, '/group_settings', arguments: widget.groupId);
                   },
                   child: Card(
-                    color: Colors.grey, // Set the background color to gray
+                    color: Color(0xFFADD8E6), // Set the background color to gray
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -206,7 +206,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                     Navigator.pushNamed(context, '/events_home', arguments: widget.groupId);
                   },
                   child: Card(
-                    color: Color(0xFFEEBEFF), // Set the background color to blue
+                    color: Color(0xFFCCCCFF), // Set the background color to blue
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -233,7 +233,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                     Navigator.pushNamed(context, '/event_memories', arguments: widget.groupId);
                   },
                   child: Card(
-                    color: Color.fromARGB(255, 207, 131, 39), // Set the background color to blue
+                    color: Color(0xFFC8A2C8), // Set the background color to blue
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -260,7 +260,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                     Navigator.pushNamed(context, '/fundcollection', arguments: widget.groupId);
                   },
                   child: Card(
-                    color: Color.fromARGB(255, 33, 135, 84), // Set the background color to blue
+                    color: Color(0xFF87CEEB), // Set the background color to blue
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -287,7 +287,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                     Navigator.pushNamed(context, '/calendar', arguments: widget.groupId);
                   },
                   child: Card(
-                    color: Color.fromARGB(255, 140, 33, 179), // Set the background color to blue
+                    color: Color(0xFFB19CD9), // Set the background color to blue
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -345,7 +345,7 @@ class _GroupDashboardPageState extends State<GroupDashboardPage> {
                       );
                   },
                   child: Card(
-                    color: Color.fromARGB(255, 232, 79, 79), // Set the background color to blue
+                    color: Color.fromARGB(255, 255, 99, 99), // Set the background color to blue
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

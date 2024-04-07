@@ -21,7 +21,9 @@ class TopNavigationBar extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: onBack,
+            onPressed: () {
+              Navigator.of(context).maybePop();
+            },
           ),
           Image.asset(
             'assets/icons/Amity Link Black.png', // Provide your logo image path

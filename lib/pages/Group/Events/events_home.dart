@@ -183,261 +183,304 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   Widget _buildEventCard(Map<String, dynamic> event, String status) {
-  String title;
-  String subtitle;
-  Widget button;
-  Color buttonColor;
-  IconData icon;
-  String buttonText;
+    String title;
+    String subtitle;
+    Widget button;
+    Color buttonColor;
+    IconData icon;
+    String buttonText;
 
-  // Extracting data from the event map
-  String docId = event['id'] ?? ''; // This is the document ID
-  String eventName = event['EventName'] ?? '';
-  String eventDescription = event['EventDescription'] ?? '';
-  Timestamp finalDate = event['FinalDate'] ?? Timestamp.now();
-  DateTime finalDateTime = finalDate.toDate();
-  String formattedFinalDateTime = DateFormat('yyyy-MM-dd HH:mm').format(finalDateTime);
+    // Extracting data from the event map
+    String docId = event['id'] ?? ''; // This is the document ID
+    String eventName = event['EventName'] ?? '';
+    String eventDescription = event['EventDescription'] ?? '';
+    Timestamp finalDate = event['FinalDate'] ?? Timestamp.now();
+    DateTime finalDateTime = finalDate.toDate();
+    String formattedFinalDateTime = DateFormat('yyyy-MM-dd HH:mm').format(finalDateTime);
 
 
-  if (status == 'Upcoming') {
-    title = eventName;
-    subtitle = formattedFinalDateTime ;
-    buttonText = 'Going to';
-    buttonColor = Colors.lightGreen;
-    icon = Icons.arrow_forward;
-  } else if (status == 'Voting') {
-    title = eventName;
-    subtitle = eventDescription;
-    buttonText = 'Date Set';
-    buttonColor = Colors.lightBlue;
-    icon = Icons.arrow_forward;
-  } else {
-    // For 'Done' status
-    title = eventName;
-    subtitle = formattedFinalDateTime ;
-    buttonText = ''; // No button for 'Done' events
-    buttonColor = Colors.transparent;
-    icon = Icons.check_circle;
+    if (status == 'Upcoming') {
+      title = eventName;
+      subtitle = formattedFinalDateTime ;
+      buttonText = 'Going to';
+      buttonColor = Colors.lightGreen;
+      icon = Icons.arrow_forward;
+    } else if (status == 'Voting') {
+      title = eventName;
+      subtitle = eventDescription;
+      buttonText = 'Date Set';
+      buttonColor = Colors.lightBlue;
+      icon = Icons.arrow_forward;
+    } else {
+      // For 'Done' status
+      title = eventName;
+      subtitle = formattedFinalDateTime ;
+      buttonText = ''; // No button for 'Done' events
+      buttonColor = Colors.transparent;
+      icon = Icons.check_circle;
+    }
+
+    button = buttonText.isNotEmpty ? ElevatedButton(
+      onPressed: () {
+        if (status == 'Upcoming' && docId.isNotEmpty) {
+          Navigator.pushNamed(context, '/attendance_poll', arguments: {'documentId': docId, 'groupId': widget.groupId}); // No need for the as String here
+        }
+        else if (status == 'Voting' && docId.isNotEmpty) {
+            Navigator.pushNamed(context, '/attendance_date', arguments: {'documentId': docId, 'groupId': widget.groupId});
+          }
+           else {
+          print('Event ID is null');
+        }
+      },
+      child: Text(
+        buttonText,
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(primary: buttonColor),
+    ) : SizedBox.shrink();
+
+    return Dismissible(
+      key: Key(event['id']),
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: 20.0),
+        child: Icon(Icons.delete, color: Colors.white),
+      ),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Confirm"),
+              content: Text("Are you sure you want to delete this event?"),
+              actions: <Widget>[
+                
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text("Delete Event"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        // Delete the document from Firestore
+        FirebaseFirestore.instance
+            .collection('amities')
+            .doc(widget.groupId)
+            .collection('Events')
+            .doc(event['id'])
+            .delete()
+            .then((value) => print("Document deleted"))
+            .catchError((error) => print("Failed to delete document: $error"));
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        child: ListTile(
+          title: Text(title),
+          subtitle: Text(subtitle),
+          trailing: button,
+          // onTap: () {
+            
+          // },
+        ),
+      ),
+    );
   }
 
-  button = buttonText.isNotEmpty ? ElevatedButton(
-    onPressed: () {
-      if (status == 'Upcoming' && docId.isNotEmpty) {
-        Navigator.pushNamed(context, '/attendance_poll', arguments: {'documentId': docId, 'groupId': widget.groupId}); // No need for the as String here
-      }
-      else if (status == 'Voting' && docId.isNotEmpty) {
-          Navigator.pushNamed(context, '/attendance_date', arguments: {'documentId': docId, 'groupId': widget.groupId});
-        }
-         else {
-        print('Event ID is null');
-      }
-    },
-    child: Text(
-      buttonText,
-      style: TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-    style: ElevatedButton.styleFrom(primary: buttonColor),
-  ) : SizedBox.shrink();
 
-  return Card(
-    margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-    child: ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: button,
-      // onTap: () {
-        
-      // },
-    ),
-  );
-}
+  Widget _buildBottomSheet(BuildContext context) {
+    DateTime? selectedDate; // Variable to store the selected date
+    String eventName = ''; // Variable to store the event name
+    String eventDescription = ''; // Variable to store the event description
 
+    // Method to show info popup
+    void _showInfoPopup() {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Urgency Date Information'),
+            content: Text('This is the date by which you would prefer the event planning to be finalised. This can be the event date or a date before the event.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
 
-Widget _buildBottomSheet(BuildContext context) {
-  DateTime? selectedDate; // Variable to store the selected date
-  String eventName = ''; // Variable to store the event name
-  String eventDescription = ''; // Variable to store the event description
-
-  // Method to show info popup
-  void _showInfoPopup() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Urgency Date Information'),
-          content: Text('This is the date by which you would prefer the event planning to be finalised. This can be the event date or a date before the event.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Event Name',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                TextFormField(
+                  onChanged: (value) {
+                    if (value.length <= 25) { // Limit the character count
+                      setState(() {
+                        eventName = value;
+                      });
+                    }
+                  },
+                  maxLength: 25, // Set max length
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40.0), // Circular edges
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Description',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                TextFormField(
+                  onChanged: (value) {
+                    setState(() {
+                      eventDescription = value;
+                    });
+                  },
+                  maxLength: 80,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40.0), // Circular edges
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Text(
+                      'Urgency Date ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 1),
+                    GestureDetector(
+                      onTap: _showInfoPopup,
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 16, // Set the size of the icon
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (pickedDate != null) {
+                            setState(() {
+                              selectedDate = pickedDate; // Update the selected date
+                            });
+                          }
+                        },
+                        child: Text('Select Date'),
+                      ),
+                    ),
+                  ],
+                ),
+                if (selectedDate != null) // Show selected date if available
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      'Selected Date: ${selectedDate!.toString().substring(0, 10)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add functionality to save the event data to Firestore
+                      _saveEventData(eventName, eventDescription, selectedDate);
+                    },
+                    child: Text('Create Event'),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
   }
 
-  return StatefulBuilder(
-    builder: (context, setState) {
-      return SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Event Name',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 5),
-              TextFormField(
-                onChanged: (value) {
-                  if (value.length <= 25) { // Limit the character count
-                    setState(() {
-                      eventName = value;
-                    });
-                  }
-                },
-                maxLength: 25, // Set max length
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40.0), // Circular edges
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Description',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 5),
-              TextFormField(
-                onChanged: (value) {
-                  setState(() {
-                    eventDescription = value;
-                  });
-                },
-                maxLength: 80,
-                maxLines: null,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40.0), // Circular edges
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              Row(
-                children: [
-                  Text(
-                    'Urgency Date ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(width: 1),
-                  GestureDetector(
-                    onTap: _showInfoPopup,
-                    child: Icon(
-                      Icons.info_outline,
-                      size: 16, // Set the size of the icon
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2100),
-                        );
-                        if (pickedDate != null) {
-                          setState(() {
-                            selectedDate = pickedDate; // Update the selected date
-                          });
-                        }
-                      },
-                      child: Text('Select Date'),
-                    ),
-                  ),
-                ],
-              ),
-              if (selectedDate != null) // Show selected date if available
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    'Selected Date: ${selectedDate!.toString().substring(0, 10)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Add functionality to save the event data to Firestore
-                    _saveEventData(eventName, eventDescription, selectedDate);
-                  },
-                  child: Text('Create Event'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
+  // Method to save event data to Firestore and clear fields on success
+  void _saveEventData(String eventName, String eventDescription, DateTime? selectedDate) {
+    if (eventName.isNotEmpty && eventDescription.isNotEmpty && selectedDate != null) {
+      // Get the current user ID from FirebaseAuth
+      String? adminID = FirebaseAuth.instance.currentUser?.uid;
 
-// Method to save event data to Firestore and clear fields on success
-void _saveEventData(String eventName, String eventDescription, DateTime? selectedDate) {
-  if (eventName.isNotEmpty && eventDescription.isNotEmpty && selectedDate != null) {
-    // Get the current user ID from FirebaseAuth
-    String? adminID = FirebaseAuth.instance.currentUser?.uid;
+      // Add data to Firestore
+      FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('Events').add({
+        'EventName': eventName,
+        'EventDescription': eventDescription,
+        'UrgencyDate': selectedDate,
+        'AdminID': adminID,
+        'EventStatus': 'Voting', // Set the initial status to 'Voting'
+      }).then((value) {
+        // Data added successfully
+        print('Event data added to Firestore');
 
-    // Add data to Firestore
-    FirebaseFirestore.instance.collection('amities').doc(widget.groupId).collection('Events').add({
-      'EventName': eventName,
-      'EventDescription': eventDescription,
-      'UrgencyDate': selectedDate,
-      'AdminID': adminID,
-      'EventStatus': 'Voting', // Set the initial status to 'Voting'
-    }).then((value) {
-      // Data added successfully
-      print('Event data added to Firestore');
-
-      // Clear fields and close bottom sheet
-      setState(() {
-        eventName = '';
-        eventDescription = '';
-        selectedDate = null;
+        // Clear fields and close bottom sheet
+        setState(() {
+          eventName = '';
+          eventDescription = '';
+          selectedDate = null;
+        });
+        
+        Navigator.of(context).pop(); // Close the bottom sheet
+      }).catchError((error) {
+        // Error handling
+        print('Failed to add event data: $error');
       });
-      
-      Navigator.of(context).pop(); // Close the bottom sheet
-    }).catchError((error) {
-      // Error handling
-      print('Failed to add event data: $error');
-    });
-  } else {
-    // Fields are empty, display an error message or handle accordingly
-    print('Please fill in all fields');
-  }       
-}
+    } else {
+      // Fields are empty, display an error message or handle accordingly
+      print('Please fill in all fields');
+    }       
+  }
 
   // Method to show date picker
   Future<void> _selectUrgencyDate(BuildContext context) async {

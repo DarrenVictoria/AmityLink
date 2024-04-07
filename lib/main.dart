@@ -18,6 +18,7 @@ import 'package:AmityLink/pages/Group/MemoryPics/individual_memories.dart';
 import 'package:AmityLink/pages/Group/Calendar/calendar_main.dart';
 import 'package:AmityLink/pages/Group/FundCollection/fundcoll_home.dart';
 import 'package:AmityLink/pages/Group/FundCollection/fundcoll_individual.dart';
+import 'package:AmityLink/pages/Group/FundCollection/fundcoll_manage.dart';
 
 
 Future<void>main()async{
@@ -115,9 +116,14 @@ class MyApp extends StatelessWidget {
           return  PaymentDetailPage(groupId: groupId, documentId: documentId);
         },
 
+        '/paymentmanage': (context) {
+          final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final String groupId = arguments['groupId']!;
+          final String documentId = arguments['documentId']!;
+          return  EventManagementPage(groupId: groupId, documentId: documentId);
+        },
 
 
-          // Define other routes here
         },
       ),
     );
