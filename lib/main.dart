@@ -58,6 +58,7 @@ class MyApp extends StatelessWidget {
           '/joinadd': (context) => JoinAddPage(),
           '/addgroup': (context) => AddGroupPage(),
           '/dashboard': (context) => UserDashboard(),
+
           '/bulletin_board': (context) {
             final String groupId = ModalRoute.of(context)!.settings.arguments as String;
             return GroupBulletinBoardPage(groupId: groupId);
