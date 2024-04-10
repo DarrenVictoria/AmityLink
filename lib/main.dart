@@ -4,21 +4,21 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:AmityLink/widget_tree.dart';
 import 'package:flutter_no_internet_widget/flutter_no_internet_widget.dart';
-import '../pages/login_register_page.dart';
-import 'package:AmityLink/pages/join_add.dart';
-import 'package:AmityLink/pages/add_group.dart';
-import 'package:AmityLink/pages/User/user_dashboard.dart';
-import 'package:AmityLink/pages/Group/BulletinBoard/bulletin_main.dart';
-import 'package:AmityLink/pages/Group/GroupSettings/group_settings.dart';
-import 'package:AmityLink/pages/Group/Events/events_home.dart';
-import 'package:AmityLink/pages/Group/Events/Upcoming/attendance_poll.dart';
-import 'package:AmityLink/pages/Group/Events/Voting/attendance_date.dart';
-import 'package:AmityLink/pages/Group/MemoryPics/event_memories.dart';
-import 'package:AmityLink/pages/Group/MemoryPics/individual_memories.dart';
-import 'package:AmityLink/pages/Group/Calendar/calendar_main.dart';
-import 'package:AmityLink/pages/Group/FundCollection/fundcoll_home.dart';
-import 'package:AmityLink/pages/Group/FundCollection/fundcoll_individual.dart';
-import 'package:AmityLink/pages/Group/FundCollection/fundcoll_manage.dart';
+import 'features/login_register_page.dart';
+import 'package:AmityLink/features/Initiate/ui/join_add.dart';
+import 'package:AmityLink/features/Initiate/ui/add_group.dart';
+import 'package:AmityLink/features/User/ui/user_dashboard.dart';
+import 'package:AmityLink/features/Group/BulletinBoard/ui/bulletin_main.dart';
+import 'package:AmityLink/features/Group/GroupSettings/ui/group_settings.dart';
+import 'package:AmityLink/features/Group/Events/Management/ui/events_home.dart';
+import 'package:AmityLink/features/Group/Events/Management/ui/attendance_poll.dart';
+import 'package:AmityLink/features/Group/Events/Management/ui/attendance_date.dart';
+import 'package:AmityLink/features/Group/MemoryPics/ui/event_memories.dart';
+import 'package:AmityLink/features/Group/MemoryPics/ui/individual_memories.dart';
+import 'package:AmityLink/features/Group/Calendar/ui/calendar_main.dart';
+import 'package:AmityLink/features/Group/FundCollection/ui/fundcoll_home.dart';
+import 'package:AmityLink/features/Group/FundCollection/ui/fundcoll_individual.dart';
+import 'package:AmityLink/features/Group/FundCollection/ui/fundcoll_manage.dart';
 
 
 Future<void>main()async{
@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
 
            '/events_home': (context) {
             final String groupId = ModalRoute.of(context)!.settings.arguments as String;
-            return EventsPage(groupId: groupId);
+            return EventsPageUI(groupId: groupId);
           },
 
           '/attendance_poll': (context) {
