@@ -87,7 +87,7 @@ And in terms of the methodology we used the Waterfall methodology. This involved
 
 ## Contributing
 
-We welcome contributions from the community to enhance Persona Prep. If you would like to contribute, please follow these steps:
+We welcome contributions from the community to enhance Amity. If you would like to contribute, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bug fix.
